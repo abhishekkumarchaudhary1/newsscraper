@@ -3,7 +3,9 @@ from bs4 import BeautifulSoup
 from supabase import create_client
 import os
 from dotenv import load_dotenv
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+IST = timezone(timedelta(hours=5, minutes=30))
 
 load_dotenv()
 
@@ -70,7 +72,7 @@ def scrape_toi():
                 "url": full_link,
                 "image_url": None,
                 "source": "Times of India",
-                "published_at": datetime.utcnow().isoformat()
+                "published_at": datetime.now(IST).isoformat()
             }
 
             try:
