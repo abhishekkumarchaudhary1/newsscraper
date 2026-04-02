@@ -3,6 +3,8 @@ from supabase import create_client
 import os
 from dotenv import load_dotenv
 
+from scraper import run_scraper
+
 load_dotenv()
 
 app = FastAPI()
@@ -34,3 +36,8 @@ def get_news():
 
     except Exception as e:
         return {"error": str(e)}
+
+@app.get("/scrape")
+def trigger_scrape():
+    run_scraper()
+    return {"message": "Scraping done"}
