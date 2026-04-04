@@ -55,6 +55,7 @@ def scrape_toi():
         soup = BeautifulSoup(res.text, "html.parser")
 
         articles = soup.select("div.top-newslist li")
+        rows = []
 
         for a in articles:
             link_tag = a.find("a")
@@ -68,7 +69,7 @@ def scrape_toi():
 
             content, description, image_url = get_article_content(full_link)
 
-            data = {
+            rows.append({
                 "title": title,
                 "description": description,
                 "content": content,
@@ -76,13 +77,17 @@ def scrape_toi():
                 "image_url": image_url,
                 "source": "Times of India",
                 "published_at": datetime.now(IST).isoformat()
-            }
+            })
 
-            try:
-                supabase.table("articles").upsert(data).execute()
-                print(f"Inserted: {title}")
-            except Exception as db_error:
-                print(f"DB Error: {db_error}")
+        # Replace entire table with this run's headlines (PostgREST requires a filter on delete)
+        supabase.table("articles").delete().not_.is_("id", None).execute()
+
+        if rows:
+            supabase.table("articles").insert(rows).execute()
+            for r in rows:
+                print(f"Inserted: {r['title']}")
+        else:
+            print("No articles found; table cleared.")
 
     except Exception as e:
         print(f"Scraping failed: {e}")
