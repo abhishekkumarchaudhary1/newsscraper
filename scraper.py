@@ -6,6 +6,8 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 
+from toi_snapshot import persist_snapshot
+
 IST = timezone(timedelta(hours=5, minutes=30))
 
 load_dotenv()
@@ -171,6 +173,8 @@ def scrape_toi():
                 print(f"[{r['feed_section']}] {r['title']}")
         else:
             print("No articles found; table cleared.")
+
+        persist_snapshot(supabase)
 
     except Exception as e:
         print(f"Scraping failed: {e}")

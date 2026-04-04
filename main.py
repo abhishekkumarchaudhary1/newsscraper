@@ -36,6 +36,7 @@ def home():
         "message": "News Scraper API is running",
         "endpoints": {
             "/news": "GET — articles (trending first, then headlines; ordered by scrape)",
+            "/market": "GET — TOI weather, AQI, gold & silver snapshot (after at least one /scrape)",
             "/scrape": "GET — trigger scraper (requires API key)",
             "/docs": "GET — interactive API documentation",
         }
@@ -60,6 +61,27 @@ def get_news():
             "data": response.data
         }
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/market")
+def get_market():
+    try:
+        response = supabase.table("toi_snapshot").select("*").eq("id", 1).execute()
+        if not response.data:
+            raise HTTPException(
+                status_code=503,
+                detail="No market snapshot yet — create table toi_snapshot and run GET /scrape once",
+            )
+        row = response.data[0]
+        return {
+            "status": "success",
+            "updated_at": row.get("updated_at"),
+            "data": row["snapshot"],
+        }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
