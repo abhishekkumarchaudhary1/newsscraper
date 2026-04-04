@@ -35,7 +35,7 @@ def home():
         "status": "success",
         "message": "News Scraper API is running",
         "endpoints": {
-            "/news": "GET — latest 20 articles",
+            "/news": "GET — articles (trending first, then headlines; ordered by scrape)",
             "/scrape": "GET — trigger scraper (requires API key)",
             "/docs": "GET — interactive API documentation",
         }
@@ -49,8 +49,8 @@ def get_news():
             supabase
             .table("articles")
             .select("*")
-            .order("published_at", desc=True)
-            .limit(20)
+            .order("scrape_order")
+            .limit(100)
             .execute()
         )
 
