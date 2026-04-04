@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from supabase import create_client
 import os
@@ -65,8 +65,9 @@ def get_news():
 
 
 @app.get("/scrape")
-def trigger_scrape(x_api_key: str = Header(None)):
-    if x_api_key != SCRAPER_API_KEY:
+def trigger_scrape(api_key: str = Query(None), x_api_key: str = Header(None)):
+    key = x_api_key or api_key
+    if key != SCRAPER_API_KEY:
         raise HTTPException(status_code=403, detail="Forbidden — invalid or missing API key")
 
     run_scraper()
