@@ -31,17 +31,20 @@ def get_article_content(url):
         meta_desc = soup.find("meta", attrs={"name": "description"})
         description = meta_desc["content"].strip() if meta_desc and meta_desc.get("content") else None
 
+        og_image = soup.find("meta", property="og:image")
+        image_url = og_image["content"].strip() if og_image and og_image.get("content") else None
+
         paragraphs = soup.select("div._s30J.clearfix p")
         content = " ".join([p.get_text(strip=True) for p in paragraphs])
 
         if not description and content:
             description = content[:200]
 
-        return content if content else None, description
+        return content if content else None, description, image_url
 
     except Exception as e:
         print(f"Error fetching content: {e}")
-        return None, None
+        return None, None, None
 
 
 def scrape_toi():
@@ -63,14 +66,14 @@ def scrape_toi():
             relative_link = link_tag["href"]
             full_link = BASE_URL + relative_link
 
-            content, description = get_article_content(full_link)
+            content, description, image_url = get_article_content(full_link)
 
             data = {
                 "title": title,
                 "description": description,
                 "content": content,
                 "url": full_link,
-                "image_url": None,
+                "image_url": image_url,
                 "source": "Times of India",
                 "published_at": datetime.now(IST).isoformat()
             }
